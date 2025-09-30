@@ -8,6 +8,7 @@ import BloodSugarChart from './BloodSugarChart';
 import BloodSugarForm from './BloodSugarForm';
 import UserProfileForm from './UserProfileForm';
 import StatCard from './StatCard';
+import GlucoseGauge from './GlucoseGauge';
 import { ArrowUpIcon, ArrowDownIcon, ActivityIcon, BloodTestIcon, FileDownloadIcon, UserIcon, LeftArrowIcon, LogoutIcon } from './icons/Icons';
 import Filters, { FiltersState } from './Filters';
 import RecordsTable from './RecordsTable';
@@ -61,6 +62,14 @@ const Dashboard: React.FC<DashboardProps> = ({ records, addRecord, updateRecord,
         const max = Math.max(...levels);
         const avg = Math.round(levels.reduce((sum, level) => sum + level, 0) / levels.length);
         return { min, max, avg };
+    }, [filteredRecords]);
+
+    const latestRecord = useMemo(() => {
+        if (filteredRecords.length === 0) return null;
+        // Encontra o registro com o maior timestamp (o mais recente)
+        return filteredRecords.reduce((latest, current) => 
+            current.timestamp > latest.timestamp ? current : latest
+        );
     }, [filteredRecords]);
     
     const handleExportPDF = () => {
@@ -155,6 +164,7 @@ const Dashboard: React.FC<DashboardProps> = ({ records, addRecord, updateRecord,
                         </div>
                         <div className="lg:col-span-3 space-y-8">
                            <Filters onFilterChange={setFilters} />
+                           <GlucoseGauge level={latestRecord?.level ?? null} lastRecordDate={latestRecord ? new Date(latestRecord.timestamp).toLocaleString('pt-BR') : null} />
                            <BloodSugarChart data={filteredRecords} />
                         </div>
                     </section>
